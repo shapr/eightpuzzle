@@ -57,18 +57,22 @@ def legal_moves(state):
     xmoves = [(a,y) for a in moves[x]]
     return ymoves + xmoves
 
+## apply_move(create_state("123405678"),(1,2)) == create_state("123045678")
+#. True
 def apply_move(state,move):
     tileindex  = tile_at(state,move) # where's the tile to swap with zero?
+    state = list(state) # argh
     zero = state[0] # get zero
     tile = state[tileindex] # get the other tile
     state[0] = tile # put the other tile (x,y) into the zero tile location
     state[tileindex] = zero # put the previous zero tile location into the other tile location
-    return state
+    return tuple(state)
 
-def succstates(state):
+## len(succ_states(create_state("123405678"))) == 4
+#. True
+def succ_states(state):
     # which tiles could zero tile move to from here?
-    legalmoves(state)
-    tile_at((2,1))
+    return [apply_move(state,m) for m in legal_moves(state)]
 
 # pair = (x,y)
 #blank = [(0,0) for n in xrange(1,10)]
