@@ -94,11 +94,11 @@ goal_board = create_board("187206345")
 # fourth value is the parent board_state, None for the start_board
 # this returns the open set as a priority queue
 def init_state(start_board,goal_board):
-    return [(state_dist(start_board_state,goal_board),0,start_board,None)]
+    return [(state_dist(start_board,goal_board),0,start_board,None)]
 # closed set, dictionary for easy lookup
 closed = {}
 # open set is the priority queue from init_state
-def solve_step(pqueue,closed):
+def solve_step(pqueue,closed,goal_board):
     if(not pqueue):
         # no more states to explore, no solution found
         # do something useful here!
@@ -116,7 +116,7 @@ def solve_step(pqueue,closed):
     succs = succ_states(parent_board_state)
     for s in succs:
         this_moves = parent_moves + 1
-        this_dist  = state_dist(s,goal)
+        this_dist  = state_dist(s,goal_board)
         if (this_dist == 0):
             # goal FOUND, we are DONE!
             goal_found(s,parent_node)
@@ -125,14 +125,19 @@ def solve_step(pqueue,closed):
             if(closed[s] > this_moves): # aha! a shorter path to this node! UPDATE THE PQUEUE!
                 pqueue.append(this_moves + this_dist,this_moves,s,parent_node)
             continue # We've already got one, NEXT!
-        pqueue.append(this_moves + this_dist,this_moves,s,parent_node)
+        pqueue.append((this_moves + this_dist,this_moves,s,parent_node))
     return (pqueue,closed)
 
-def __main__():
-    init = init_state(create_board("123405678"),create_board("123405678"))
+def main():
+    goal_board = create_board("123450678")
+    start_board = create_board("123405678")
+    init = init_state(start_board,goal_board)
     closed = {}
-    while (solve_step(init,closed)):
+    while (solve_step(init,closed,goal_board)):
         print 'next step!'
+
+if __name__ == '__main__':
+    main()
 
 # board state also keeps g (cost so far)
 # possibly h, possibly g, possibly f
