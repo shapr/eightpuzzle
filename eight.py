@@ -71,7 +71,7 @@ def succ_states(state):
     # which tiles could zero tile move to from here?
     return [apply_move(state,m) for m in legal_moves(state)]
 
-def goal_found(s,node):
+def goal_found(g,node):
     print "goal has been found"
     print "steps are:"
     steps = []
@@ -79,8 +79,10 @@ def goal_found(s,node):
         steps.append(node[2])
         node = node[3]
     steps.reverse()
+    print "steps is ",steps
     for s in steps:
-        print showstate(s)
+        print show_board(s)
+    print show_board(g)
 
 start_board = create_board("617285340")
 goal_board = create_board("187206345")
@@ -121,7 +123,7 @@ def solve_step(pqueue,closed,goal_board):
             # goal FOUND, we are DONE!
             goal_found(s,parent_node)
             return '' # umm, termination condition?
-        if closed.has_key(s):
+        if s in closed:
             if(closed[s] > this_moves): # aha! a shorter path to this node! UPDATE THE PQUEUE!
                 pqueue.append(this_moves + this_dist,this_moves,s,parent_node)
             continue # We've already got one, NEXT!
