@@ -78,11 +78,12 @@ def goal_found(g,node):
     while(node[3]):
         steps.append(node[2])
         node = node[3]
+    steps.append(node[2]) # start state
     steps.reverse()
-    print "steps is ",steps
     for s in steps:
         print show_board(s)
     print show_board(g)
+    print
 
 start_board = create_board("617285340")
 goal_board = create_board("187206345")
@@ -131,8 +132,8 @@ def solve_step(pqueue,closed,goal_board):
     return (pqueue,closed)
 
 def main():
-    goal_board = create_board("123450678")
-    start_board = create_board("123405678")
+    goal_board = create_board("123405678")
+    start_board = create_board("123450678")
     init = init_state(start_board,goal_board)
     closed = {}
     while (solve_step(init,closed,goal_board)):
