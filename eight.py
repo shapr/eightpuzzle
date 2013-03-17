@@ -1,29 +1,45 @@
+# state = [(2, 2), (1, 1), (2, 1), (3, 1), (1, 2), (3, 2), (1, 3), (2, 3), (3, 3)]
+# this list is the (x,y) position of the respective tile.
+# the empty tile is the zero position, 
 
 
-def showstate(state):
+def show_state(state):
     line = "-------"
-    top = "|%s|%s|%s|" % tuple([tileat(state,pos) for pos in [(1,1),(2,1),(3,1)]])
-    mid = "|%s|%s|%s|" % tuple([tileat(state,pos) for pos in [(1,2),(2,2),(3,2)]])
-    bot = "|%s|%s|%s|" % tuple([tileat(state,pos) for pos in [(1,3),(2,3),(3,3)]])
+    top = "|%s|%s|%s|" % tuple([tile_at(state,pos) for pos in [(1,1),(2,1),(3,1)]])
+    mid = "|%s|%s|%s|" % tuple([tile_at(state,pos) for pos in [(1,2),(2,2),(3,2)]])
+    bot = "|%s|%s|%s|" % tuple([tile_at(state,pos) for pos in [(1,3),(2,3),(3,3)]])
     return '\n'.join([line,top,line,mid,line,bot,line])
 
-def createstate(numbers):
+## ((2, 2), (1, 1), (2, 1), (3, 1), (1, 2), (3, 2), (1, 3), (2, 3), (3, 3)) == create_state("123405678")
+#. True
+
+def create_state(numbers):
     # must have at least nine numbers in the input string, will act weird if they're not unique
     # 123405678
     positions = [(x,y) for y in [1,2,3] for x in [1,2,3]] # order is important here!
     state = zip(numbers,positions)
     state.sort() # now ordered correctly
-    return map(lambda x:x[1],state) # strip the values, leave only positions
+    return tuple(map(lambda x:x[1],state)) # strip the values, leave only positions
 
-def tileat(state,(x,y)):
+## 0 == tile_at(create_state("123405678"),(2,2))
+#. True
+def tile_at(state,(x,y)):
     return state.index((x,y))
 
-nil = []
+## 2 + 3
+#. 5
 
+nil = []
+## 0 == dist((1,1),(1,1))
+#. True
+## 1 == dist((1,2),(1,1))
+#. True
 def dist(a,b):
     return abs(a[0]-b[0]) + abs(a[1]-b[1])
 
-def statedist(sa,sb):
+## 1 == state_dist(create_state("123405678"),create_state("123045678"))
+#. True
+def state_dist(sa,sb):
     # must leave out the zero for this to work, [1:] drops the first (zero) item
     return sum([dist(a,b) for (a,b) in zip(sa[1:],sb[1:])])
 
@@ -32,7 +48,7 @@ def statedist(sa,sb):
 moves = {1:[2],2:[1,3],3:[2]}
 
 # will return a list of (x,y) values where the zero tile could be moved
-def legalmoves(state):
+def legal_moves(state):
     # grab the zero tile
     zero = state[0]
     x,y = zero # x,y = (2,2) for example
@@ -41,8 +57,8 @@ def legalmoves(state):
     xmoves = [(a,y) for a in moves[x]]
     return ymoves + xmoves
 
-def applymove(state,move):
-    tileindex  = tileat(state,move) # where's the tile to swap with zero?
+def apply_move(state,move):
+    tileindex  = tile_at(state,move) # where's the tile to swap with zero?
     zero = state[0] # get zero
     tile = state[tileindex] # get the other tile
     state[0] = tile # put the other tile (x,y) into the zero tile location
@@ -52,14 +68,14 @@ def applymove(state,move):
 def succstates(state):
     # which tiles could zero tile move to from here?
     legalmoves(state)
-    tileat((2,1))
+    tile_at((2,1))
 
 # pair = (x,y)
 #blank = [(0,0) for n in xrange(1,10)]
 # 123
 # 405
 # 678
-start = createstate("123405678")
+start = create_state("123405678")
 # or [(2,2),(1,1),(2,1),(3,1),(1,2),(3,2),(1,3),(2,3),(3,3)]
 
 oneaway = [(2,2),(1,1),(2,1),(3,1),(3,2),(3,3),(2,3),(1,3),(1,2)]
