@@ -1,7 +1,7 @@
+#!/usr/bin/env python
 # state = [(2, 2), (1, 1), (2, 1), (3, 1), (1, 2), (3, 2), (1, 3), (2, 3), (3, 3)]
 # this list is the (x,y) position of the respective tile.
-# the empty tile is the zero position, 
-
+# the empty tile is the zero position,
 
 def show_board(board):
     line = "-------"
@@ -23,10 +23,10 @@ def create_board(numbers):
 
 ## 0 == tile_at(create_board("123405678"),(2,2))
 #. True
+
 def tile_at(state,(x,y)):
     return state.index((x,y))
 
-nil = []
 ## 0 == dist((1,1),(1,1))
 #. True
 ## 1 == dist((1,2),(1,1))
@@ -82,8 +82,8 @@ def goal_found(g,node):
     steps.reverse()
     for s in steps:
         print show_board(s)
-    print show_board(g)
-    print
+    print show_board(g) # end state?
+    print "total number of steps taken is ",(len(steps)+1)
 
 start_board = create_board("617285340")
 goal_board = create_board("187206345")
@@ -105,39 +105,54 @@ def solve_step(pqueue,closed,goal_board):
     if(not pqueue):
         # no more states to explore, no solution found
         # do something useful here!
-        pass
-    pqueue.sort() # sort in order of moves_from_start + heuristic_to_goal
+        print "No solution found"
+        return 0
+    pqueue.sort(reverse=True) # sort in ASCENDING order of moves_from_start + heuristic_to_goal
     parent_node = pqueue.pop() # get the least cost node
     # unpack the four tuple, ignore the sort value
-    p,parent_moves,parent_board_state,parent = parent_node
+    p, parent_moves, parent_board_state, parent = parent_node
 
     closed[parent_board_state] = parent_moves
 
     # find the successor board states
-    # if they're in the closed set, don't add them XXX should this check closed set cost and update?
+    # if they're in the closed set, don't add them
+    # this checks closed set cost and reopens nodes with a shorter cost than we had before
     # otherwise, calculate their heuristic cost, add that to the parent move value + 1 and return the new state
     succs = succ_states(parent_board_state)
     for s in succs:
         this_moves = parent_moves + 1
-        this_dist  = state_dist(s,goal_board)
+        this_dist  = state_dist(s, goal_board)
         if (this_dist == 0):
             # goal FOUND, we are DONE!
             goal_found(s,parent_node)
-            return '' # umm, termination condition?
+            return 0 # umm, termination condition?
         if s in closed:
             if(closed[s] > this_moves): # aha! a shorter path to this node! UPDATE THE PQUEUE!
-                pqueue.append(this_moves + this_dist,this_moves,s,parent_node)
+                pqueue.append(this_moves + this_dist,this_moves, s, parent_node)
             continue # We've already got one, NEXT!
-        pqueue.append((this_moves + this_dist,this_moves,s,parent_node))
+        pqueue.append((this_moves + this_dist, this_moves, s, parent_node))
     return (pqueue,closed)
 
+def get_board():
+    board_input = raw_input('> ')
+    while not (len(board_input) == 9 and board_input.isdigit()):
+        print "invalid input, try again."
+        board_input = raw_input('> ')
+    return board_input
+
 def main():
-    goal_board = create_board("123405678")
-    start_board = create_board("123450678")
+    print "You can now enter a start and goal board, in the format: 123405678"
+    print "start?"
+    start_input = get_board()
+    print "goal?"
+    goal_input = get_board()
+    goal_board = create_board(goal_input)
+    start_board = create_board(start_input)
     init = init_state(start_board,goal_board)
     closed = {}
     while (solve_step(init,closed,goal_board)):
-        print 'next step!'
+        #print 'next step!'
+        pass
 
 if __name__ == '__main__':
     main()
