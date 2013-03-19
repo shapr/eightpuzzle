@@ -86,10 +86,11 @@ def succ_states(state):
     # which tiles could zero tile move to from here?
     return [apply_move(state,m) for m in legal_moves(state)]
 
-def goal_found(g,node):
+def goal_found(g,node,nodes_explored):
     print "goal has been found"
     print "steps are:"
     steps = []
+    steps.append(g)
     while(node[3]):
         steps.append(node[2])
         node = node[3]
@@ -97,8 +98,7 @@ def goal_found(g,node):
     steps.reverse()
     for s in steps:
         print show_board(s)
-    print show_board(g) # end state?
-    print "total number of steps taken is ",(len(steps)+1)
+    print "total number of steps taken is ",(len(steps)-1)
 
 # the closed set is a dictionary for easy board_state lookup
 closed = {}
@@ -110,6 +110,7 @@ def init_state(start_board,goal_board):
 # the four tuple passed around in solver is (h(n)+g(n),g(n),board_state,parent_tuple)
 # the four tuple is described further at the top of this file
 def solver(pqueue,closed,goal_board):
+    nodes_explored = 0
     if(not pqueue):
         # no more states to explore, no solution found
         # do something useful here!
@@ -130,11 +131,12 @@ def solver(pqueue,closed,goal_board):
     # otherwise, calculate their heuristic cost, add that to the parent move value + 1 and return the new state
     succs = succ_states(parent_board_state)
     for s in succs:
+        nodes_explored += 1
         this_moves = parent_moves + 1
         this_dist  = state_dist(s, goal_board)
         if (this_dist == 0):
             # goal FOUND, we are DONE!
-            goal_found(s,parent_node)
+            goal_found(s,parent_node,nodes_explored)
             return 0 # umm, termination condition?
         if s in closed:
             if(closed[s][1] > this_moves): # aha! a shorter path to this node! UPDATE THE PQUEUE!
@@ -152,14 +154,15 @@ def get_board():
 
 def main():
     print "You can now enter a start and goal board, in the format: 123405678"
-    print "start?"
-    #start_input = get_board()
-    print "goal?"
-    #goal_input = get_board()
-    goal_input = "187206345"
-    start_input = "287354016"
+    print "start? ex: 287354016"
+    start_input = get_board()
+    print "goal? ex: 187206345"
+    goal_input = get_board()
     goal_board = create_board(goal_input)
     start_board = create_board(start_input)
+    if(goal_board == start_board):
+        print "start and goal are the same, no work to do"
+        return
     init = init_state(start_board,goal_board)
     closed = {}
     while (solver(init,closed,goal_board)):
