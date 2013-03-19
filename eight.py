@@ -165,7 +165,7 @@ def main():
     start_board = create_board(start_input)
     init = init_state(start_board,goal_board)
     closed = {}
-    while (solve_step(init,closed,goal_board)):
+    while (solver(init,closed,goal_board)):
         #print 'next step!'
         pass
 
