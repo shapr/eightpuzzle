@@ -1,7 +1,20 @@
 #!/usr/bin/env python
-# state = [(2, 2), (1, 1), (2, 1), (3, 1), (1, 2), (3, 2), (1, 3), (2, 3), (3, 3)]
+# the line above means if this file is chmod u+x then ./eight.py will work, as long as python is in your $PATH
+
+# Shae Erisson
+# CS470-01 2013 assignment #1
+# A* solver for the eight puzzle
+
+# board_state = [(2, 2), (1, 1), (2, 1), (3, 1), (1, 2), (3, 2), (1, 3), (2, 3), (3, 3)]
 # this list is the (x,y) position of the respective tile.
-# the empty tile is the zero position,
+# the state above says the empty tile is the 2,2 position, the 1 tile is in the 1,1 position etc.
+
+# the actual solver function passes around a tuple of four values:
+# this_tuple = (h(n)+g(n),g(n),board_state,parent_tuple)
+# h(n)+g(n) is first so I can just sort a list instead of using a 'real' priority queue
+# g(n) is separate for easy calculating of g(n)+1 for successor board_state tuples
+# board_state is the value described above, a list of (x,y) postitions
+# parent_tuple is a reference to the predecessor move, for the start state, it will be None
 
 def show_board(board):
     line = "-------"
@@ -44,10 +57,10 @@ def state_dist(sa,sb):
 # 1 -> 2; 2 -> 1,3; 3 -> 2
 moves = {1:[2],2:[1,3],3:[2]}
 
-# will return a list of (x,y) values where the zero tile could be moved
-def legal_moves(state):
-    # grab the zero tile
-    zero = state[0]
+# will return a list of (x,y) values of where the zero tile could be moved to
+def legal_moves(board_state):
+    # grab the zero tile from the state
+    zero = board_state[0]
     x,y = zero # x,y = (2,2) for example
     # cartesian product of one value and possible moves of the other value
     ymoves = [(x,b) for b in moves[y]]
@@ -56,14 +69,16 @@ def legal_moves(state):
 
 ## apply_move(create_board("123405678"),(1,2)) == create_board("123045678")
 #. True
-def apply_move(state,move):
-    tileindex  = tile_at(state,move) # where's the tile to swap with zero?
-    state = list(state) # argh
-    zero = state[0] # get zero
-    tile = state[tileindex] # get the other tile
-    state[0] = tile # put the other tile (x,y) into the zero tile location
-    state[tileindex] = zero # put the previous zero tile location into the other tile location
-    return tuple(state)
+
+# this unattractive function swaps the zero tile with the tile at the position given
+def apply_move(board_state,move):
+    tileindex  = tile_at(board_state,move) # where's the tile to swap with zero?
+    board_state = list(board_state) # cast to a mutable type, argh
+    zero = board_state[0] # get zero
+    tile = board_state[tileindex] # get the other tile
+    board_state[0] = tile # put the other tile (x,y) into the zero tile location
+    board_state[tileindex] = zero # put the previous zero tile location into the other tile location
+    return tuple(board_state) # cast back to an immutable type for dictionary use, argh
 
 ## len(succ_states(create_board("123405678"))) == 4
 #. True
@@ -85,12 +100,7 @@ def goal_found(g,node):
     print show_board(g) # end state?
     print "total number of steps taken is ",(len(steps)+1)
 
-start_board = create_board("617285340")
-goal_board = create_board("187206345")
-
-## state_dist(start_board,goal_board) == 6
-#. True
-
+# state 
 # priority will always be (moves_from_start + heuristic_to_goal)
 # second value is moves from start, for easy incrementing
 # third value is the board_state
@@ -101,7 +111,8 @@ def init_state(start_board,goal_board):
 # closed set, dictionary for easy lookup
 closed = {}
 # open set is the priority queue from init_state
-def solve_step(pqueue,closed,goal_board):
+# the four tuple passed around in solver is (h(n)+g(n),g(n),board_state,parent_tuple)
+def solver(pqueue,closed,goal_board):
     if(not pqueue):
         # no more states to explore, no solution found
         # do something useful here!
@@ -111,8 +122,10 @@ def solve_step(pqueue,closed,goal_board):
     parent_node = pqueue.pop() # get the least cost node
     # unpack the four tuple, ignore the sort value
     p, parent_moves, parent_board_state, parent = parent_node
-
-    closed[parent_board_state] = parent_moves
+    if parent_moves > 100:
+        print "too many steps, giving up"
+        return 0 # too many steps
+    closed[parent_board_state] = parent_node
 
     # find the successor board states
     # if they're in the closed set, don't add them
@@ -127,7 +140,7 @@ def solve_step(pqueue,closed,goal_board):
             goal_found(s,parent_node)
             return 0 # umm, termination condition?
         if s in closed:
-            if(closed[s] > this_moves): # aha! a shorter path to this node! UPDATE THE PQUEUE!
+            if(closed[s][1] > this_moves): # aha! a shorter path to this node! UPDATE THE PQUEUE!
                 pqueue.append(this_moves + this_dist,this_moves, s, parent_node)
             continue # We've already got one, NEXT!
         pqueue.append((this_moves + this_dist, this_moves, s, parent_node))
@@ -143,9 +156,11 @@ def get_board():
 def main():
     print "You can now enter a start and goal board, in the format: 123405678"
     print "start?"
-    start_input = get_board()
+    #start_input = get_board()
     print "goal?"
-    goal_input = get_board()
+    #goal_input = get_board()
+    goal_input = "187206345"
+    start_input = "287354016"
     goal_board = create_board(goal_input)
     start_board = create_board(start_input)
     init = init_state(start_board,goal_board)
