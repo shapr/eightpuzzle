@@ -100,18 +100,15 @@ def goal_found(g,node):
     print show_board(g) # end state?
     print "total number of steps taken is ",(len(steps)+1)
 
-# state 
-# priority will always be (moves_from_start + heuristic_to_goal)
-# second value is moves from start, for easy incrementing
-# third value is the board_state
-# fourth value is the parent board_state, None for the start_board
-# this returns the open set as a priority queue
+# the closed set is a dictionary for easy board_state lookup
+closed = {}
+
+# given start and goal board states, return the initial solver state.
 def init_state(start_board,goal_board):
     return [(state_dist(start_board,goal_board),0,start_board,None)]
-# closed set, dictionary for easy lookup
-closed = {}
-# open set is the priority queue from init_state
+
 # the four tuple passed around in solver is (h(n)+g(n),g(n),board_state,parent_tuple)
+# the four tuple is described further at the top of this file
 def solver(pqueue,closed,goal_board):
     if(not pqueue):
         # no more states to explore, no solution found
@@ -171,26 +168,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# board state also keeps g (cost so far)
-# possibly h, possibly g, possibly f
-# possibly a pointer to the previous node
-
-# priority queue of nodes so you can pick the cheapest step each time
-
-# init by putting start node on the priority queue
-# check to see if there's anything on the list
-# pull from priority queue, are you goal? done
-# if nothing on queue, fail
-# otherwise call next/succ for moves that slide the zero tile
-
-# generate succ states by checking zero tile position
-# if sub 1 from x or y and is less than min, cannot move there
-# if add 1 to x or y and is more than max, cannot move there
-
-# jerkins created an enum type to find legal moves
-# enum moves { left=1,right=2,up=4,down=8 }
-# still had to calculate legal moves, but returned a mask value to say what moves are legal
-
-# output to console is the sequence of states leading to the goal
-# give up if you don't find it after 1000 moves or so
